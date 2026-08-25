@@ -7,6 +7,8 @@ Wants=network-online.target
 User={{ kiosk_user }}
 PAMName=login
 TTYPath=/dev/tty7
+# Lingering keeps /run/user/<uid> around; point the compositor at it.
+Environment=XDG_RUNTIME_DIR=/run/user/%U
 {% if kiosk_software_rendering %}
 # Virtualized GPUs (virtio/virgl) glitch white frames under GL compositing.
 Environment=WLR_RENDERER=pixman

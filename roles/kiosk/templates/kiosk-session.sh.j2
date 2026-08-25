@@ -9,6 +9,12 @@
 # sway implements the virtual pointer/keyboard protocols, so the remote
 # view can control the kiosk.
 {% endif %}
+# The PAM login session leaks an ambient cap_wake_alarm into the kiosk
+# process; bwrap (WebKit's sandbox helper) refuses to run non-setuid while
+# holding an unexpected capability, so the browser renders nothing. Drop
+# inherited/ambient caps before cog — the WebKit sandbox itself stays on.
+drop_caps="setpriv --inh-caps -all --ambient-caps -all"
+
 # Supervised in a loop — at session start wayvnc can race the compositor's
 # output setup.
 (
@@ -18,10 +24,10 @@
   done
 ) &
 {% if kiosk_compositor == 'sway' %}
-cog --platform=wl "{{ kiosk_url }}"
+$drop_caps cog --platform=wl "{{ kiosk_url }}"
 # cog ended (crash or exit) — end the compositor too, so systemd restarts
 # the whole session cleanly (same semantics as cage's session child).
 swaymsg exit
 {% else %}
-exec cog --platform=wl "{{ kiosk_url }}"
+exec $drop_caps cog --platform=wl "{{ kiosk_url }}"
 {% endif %}

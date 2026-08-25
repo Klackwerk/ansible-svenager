@@ -24,6 +24,32 @@
     append: true
     shell: /usr/sbin/nologin
 
+# systemd services get no logind runtime dir reliably; lingering creates a
+# persistent /run/user/<uid> so the compositor finds XDG_RUNTIME_DIR.
+- name: Enable lingering for the kiosk user
+  ansible.builtin.command:
+    cmd: loginctl enable-linger {{ kiosk_user }}
+    creates: "/var/lib/systemd/linger/{{ kiosk_user }}"
+  when: ansible_service_mgr == 'systemd'
+
+- name: Detect an installed display manager
+  ansible.builtin.stat:
+    path: /etc/systemd/system/display-manager.service
+  register: kiosk_display_manager
+
+# A pre-existing display manager (lightdm/gdm3/sddm) owns seat0, the GPU
+# and tty7, so the kiosk compositor can never take the screen. Mask it —
+# the kiosk service is the only thing driving the display.
+- name: Disable a conflicting display manager
+  ansible.builtin.systemd:
+    name: display-manager.service
+    state: stopped
+    masked: true
+  when:
+    - ansible_service_mgr == 'systemd'
+    - kiosk_display_manager.stat.exists
+  notify: Restart kiosk
+
 - name: Create local page directory
   ansible.builtin.file:
     path: /usr/local/share/svenager-kiosk
