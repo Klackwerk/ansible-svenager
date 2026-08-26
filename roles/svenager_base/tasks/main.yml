@@ -19,3 +19,26 @@
     regexp: '^127\.0\.1\.1\s'
     line: "127.0.1.1\t{{ svenager_hostname }}"
   when: svenager_hostname | default('') | length > 0
+
+# Enables signed agent self-update: the server hosts the binaries and their
+# signatures, the device verifies them against this public key. Patched into
+# agent.json in place so server_url, device_id and the rest are preserved.
+- name: Trust the agent update signing key
+  when: svenager_update_public_key | default('') | length > 0
+  block:
+    - name: Read the agent configuration
+      ansible.builtin.slurp:
+        src: /etc/svenager/agent.json
+      register: svenager_agent_json
+
+    - name: Write update_public_key into the agent configuration
+      ansible.builtin.copy:
+        dest: /etc/svenager/agent.json
+        content: >-
+          {{ (svenager_agent_json.content | b64decode | from_json
+             | combine({'update_public_key': svenager_update_public_key}))
+             | to_nice_json }}
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Restart svenager-agent

@@ -2,3 +2,7 @@
 svenager_base_packages:
   - git
   - ansible-core
+
+# Base64 raw Ed25519 public key that the agent verifies self-updates against
+# (scripts/agent-update-keys.sh gen). Empty leaves agent.json untouched.
+svenager_update_public_key: ""

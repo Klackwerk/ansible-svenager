@@ -1,0 +1,6 @@
+---
+- name: Restart svenager-agent
+  ansible.builtin.systemd:
+    name: svenager-agent
+    state: restarted
+  when: ansible_service_mgr == 'systemd'

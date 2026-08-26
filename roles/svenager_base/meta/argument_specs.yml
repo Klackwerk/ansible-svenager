@@ -12,3 +12,10 @@ argument_specs:
         elements: str
         default: [git, ansible-core]
         description: Packages every managed device needs.
+      svenager_update_public_key:
+        type: str
+        default: ""
+        description:
+          - Base64 raw Ed25519 public key the agent verifies self-updates
+            against. Set it to enable "Update agent"; the base role writes it
+            into the device's agent.json. Empty leaves agent.json untouched.
