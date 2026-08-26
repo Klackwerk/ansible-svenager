@@ -123,3 +123,25 @@
     daemon_reload: true
   loop: [seatd, kiosk]
   when: ansible_service_mgr == 'systemd'
+
+# Self-heal: a restart driven only by a notify handler is lost when an
+# earlier task in the apply fails, and the next, now-idempotent run never
+# re-notifies — the new URL sits in the session script but the running
+# browser keeps the old page. Check what cog actually shows and restart
+# when it does not match, independent of any handler.
+- name: Check whether the kiosk shows the configured URL
+  ansible.builtin.command:
+    cmd: pgrep -u {{ kiosk_user }} -f -- {{ ('cog .*' ~ (kiosk_url | regex_escape)) | quote }}
+  register: kiosk_url_running
+  changed_when: false
+  failed_when: false
+  when: ansible_service_mgr == 'systemd'
+
+- name: Restart kiosk when it is not showing the configured URL
+  ansible.builtin.systemd:
+    name: kiosk
+    state: restarted
+    daemon_reload: true
+  when:
+    - ansible_service_mgr == 'systemd'
+    - kiosk_url_running.rc | default(1) != 0
