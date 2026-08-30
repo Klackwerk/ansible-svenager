@@ -40,9 +40,12 @@
 # A pre-existing display manager (lightdm/gdm3/sddm) owns seat0, the GPU
 # and tty7, so the kiosk compositor can never take the screen. Mask it —
 # the kiosk service is the only thing driving the display.
+# display-manager.service is only an alias symlink to the real unit and
+# systemd refuses to mask an alias, so resolve and mask the target unit.
 - name: Disable a conflicting display manager
   ansible.builtin.systemd:
-    name: display-manager.service
+    name: "{{ kiosk_display_manager.stat.lnk_source
+      | default(kiosk_display_manager.stat.path) | basename }}"
     state: stopped
     masked: true
   when:
