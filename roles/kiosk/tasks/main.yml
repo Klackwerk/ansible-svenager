@@ -15,6 +15,54 @@
     name: "{{ 'sway' if kiosk_compositor == 'sway' else 'cage' }}"
     state: present
 
+# Debian trixie ships cog 0.18.4, whose Wayland platform hands raw evdev
+# button codes to WPE WebKit; since WebKit 2.46 those fire "auxclick"
+# instead of "click", so pages ignore mouse clicks — locally and through
+# the remote view alike. cog 0.18.5 fixes it but only reached sid; its
+# build has the same dependency set, so install it from the Debian
+# snapshot archive. Skipped once a fixed version is installed.
+- name: Read installed cog version
+  ansible.builtin.command:
+    cmd: dpkg-query -W -f '${Version}' cog
+  register: kiosk_cog_version
+  changed_when: false
+  when: ansible_distribution_release == 'trixie'
+
+- name: Install click-fixed cog on Debian trixie
+  vars:
+    kiosk_cog_fix_arch: >-
+      {{ {'aarch64': 'arm64', 'armv7l': 'armhf', 'x86_64': 'amd64'}
+         .get(ansible_architecture, '') }}
+    kiosk_cog_fix_deb: "cog_0.18.5-1_{{ kiosk_cog_fix_arch }}.deb"
+    kiosk_cog_fix_sha256:
+      arm64: 62bb42ca39ba1e5e7aedc201160e689b2327c17a23b0bd0ccf5a8ad59cd6dc68
+      armhf: c3b698c9e3e8ab77a49e49abf1b40ef07e6c34fae52dedaa32511af00e792e6e
+      amd64: 4d5a76480e2449185fd6b7dad88f0337f93882327b02d6e517ebf9d6b93a4f2b
+  when:
+    - ansible_distribution_release == 'trixie'
+    - kiosk_cog_version.stdout is version('0.18.5', '<')
+    - kiosk_cog_fix_arch in kiosk_cog_fix_sha256
+  block:
+    - name: Create kiosk package cache
+      ansible.builtin.file:
+        path: /var/cache/svenager-kiosk
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Download cog 0.18.5
+      ansible.builtin.get_url:
+        url: "https://snapshot.debian.org/archive/debian/20250530T143637Z/pool/main/c/cog/{{ kiosk_cog_fix_deb }}"
+        dest: "/var/cache/svenager-kiosk/{{ kiosk_cog_fix_deb }}"
+        checksum: "sha256:{{ kiosk_cog_fix_sha256[kiosk_cog_fix_arch] }}"
+        mode: "0644"
+
+    - name: Install cog 0.18.5
+      ansible.builtin.apt:
+        deb: "/var/cache/svenager-kiosk/{{ kiosk_cog_fix_deb }}"
+      notify: Restart kiosk
+
 # Debian's seatd grants seat access to the "video" group (seatd -g video),
 # and the PAM login session covers device access via logind.
 - name: Create kiosk user
