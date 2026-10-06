@@ -18,12 +18,13 @@
     - vnc_server_backend == 'wayvnc'
     - ansible_service_mgr == 'systemd'
 
+# No daemon_reload: newer systemctl rejects --global daemon-reload; user
+# managers read the unit when the next session starts.
 - name: Enable wayvnc for all graphical sessions
   ansible.builtin.systemd:
     name: svenager-wayvnc
     enabled: true
     scope: global
-    daemon_reload: true
   when:
     - vnc_server_backend == 'wayvnc'
     - ansible_service_mgr == 'systemd'
