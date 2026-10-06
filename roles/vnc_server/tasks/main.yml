@@ -29,6 +29,33 @@
     - vnc_server_backend == 'wayvnc'
     - ansible_service_mgr == 'systemd'
 
+# Raspberry Pi OS's labwc session never activates graphical-session.target
+# but runs XDG autostart entries; start the unit from there as well.
+- name: Create XDG autostart directory
+  ansible.builtin.file:
+    path: /etc/xdg/autostart
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: vnc_server_backend == 'wayvnc'
+
+- name: Start wayvnc from XDG autostart
+  ansible.builtin.copy:
+    dest: /etc/xdg/autostart/svenager-wayvnc.desktop
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=Svenager VNC server
+      Exec=systemctl --user start svenager-wayvnc.service
+      NoDisplay=true
+    owner: root
+    group: root
+    mode: "0644"
+  when:
+    - vnc_server_backend == 'wayvnc'
+    - ansible_service_mgr == 'systemd'
+
 - name: Install x11vnc (X11)
   ansible.builtin.apt:
     name: x11vnc
