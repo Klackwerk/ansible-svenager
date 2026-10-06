@@ -9,6 +9,14 @@ kiosk_url: "file:///usr/local/share/svenager-kiosk/index.html"
 # from "network down".
 kiosk_connectivity_url: "http://detectportal.firefox.com/success.txt"
 
+# Optional second screen with its own page. Set kiosk_second_url to show it
+# fullscreen on kiosk_second_output while kiosk_url stays on kiosk_output.
+# Output names as sway reports them (swaymsg -t get_outputs); a Raspberry
+# Pi's two HDMI ports are HDMI-A-1 and HDMI-A-2. Empty: one screen.
+kiosk_second_url: ""
+kiosk_output: HDMI-A-1
+kiosk_second_output: HDMI-A-2
+
 kiosk_user: kiosk
 kiosk_vnc_port: 5900
 

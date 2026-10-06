@@ -22,6 +22,23 @@ argument_specs:
         description:
           - Endpoint the local status page uses to tell a Svenager outage
             apart from a device network outage.
+      kiosk_second_url:
+        type: str
+        default: ""
+        description:
+          - Page shown fullscreen on a second screen (kiosk_second_output),
+            while kiosk_url stays on kiosk_output and keeps keyboard focus.
+            Empty runs a single screen. Needs the sway compositor.
+      kiosk_output:
+        type: str
+        default: HDMI-A-1
+        description:
+          - Output showing kiosk_url when a second screen is configured,
+            as named by sway (swaymsg -t get_outputs).
+      kiosk_second_output:
+        type: str
+        default: HDMI-A-2
+        description: Output showing kiosk_second_url.
       kiosk_user:
         type: str
         default: kiosk

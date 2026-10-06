@@ -23,7 +23,15 @@ drop_caps="setpriv --inh-caps -all --ambient-caps -all"
     sleep 2
   done
 ) &
-{% if kiosk_compositor == 'sway' %}
+{% if kiosk_compositor == 'sway' and kiosk_second_url %}
+# A window opens on the workspace focused when sway exec'd it, so start the
+# second screen first and finish on workspace 1: the main page maps last on
+# the focused workspace and gets keyboard focus. kiosk-browser.sh ends the
+# session when either browser exits.
+swaymsg "workspace 2; exec /usr/local/bin/kiosk-browser.sh 2"
+swaymsg "workspace 1; exec /usr/local/bin/kiosk-browser.sh 1"
+wait
+{% elif kiosk_compositor == 'sway' %}
 $drop_caps cog --platform=wl "{{ kiosk_url }}"
 # cog ended (crash or exit) — end the compositor too, so systemd restarts
 # the whole session cleanly (same semantics as cage's session child).

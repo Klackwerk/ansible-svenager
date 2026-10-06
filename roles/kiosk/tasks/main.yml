@@ -148,6 +148,15 @@
     mode: "0755"
   notify: Restart kiosk
 
+- name: Install kiosk browser script
+  ansible.builtin.template:
+    src: kiosk-browser.sh.j2
+    dest: /usr/local/bin/kiosk-browser.sh
+    owner: root
+    group: root
+    mode: "0755"
+  notify: Restart kiosk
+
 - name: Install kiosk unit
   ansible.builtin.template:
     src: kiosk.service.j2
@@ -180,19 +189,21 @@
 # re-notifies — the new URL sits in the session script but the running
 # browser keeps the old page. Check what cog actually shows and restart
 # when it does not match, independent of any handler.
-- name: Check whether the kiosk shows the configured URL
+- name: Check whether the kiosk shows the configured URLs
   ansible.builtin.command:
-    cmd: pgrep -u {{ kiosk_user }} -f -- {{ ('cog .*' ~ (kiosk_url | regex_escape)) | quote }}
+    cmd: pgrep -u {{ kiosk_user }} -f -- {{ ('cog .*' ~ (item | regex_escape)) | quote }}
+  loop: "{{ [kiosk_url] + ([kiosk_second_url] if kiosk_second_url else []) }}"
   register: kiosk_url_running
   changed_when: false
   failed_when: false
   when: ansible_service_mgr == 'systemd'
 
-- name: Restart kiosk when it is not showing the configured URL
+- name: Restart kiosk when it is not showing the configured URLs
   ansible.builtin.systemd:
     name: kiosk
     state: restarted
     daemon_reload: true
   when:
     - ansible_service_mgr == 'systemd'
-    - kiosk_url_running.rc | default(1) != 0
+    - kiosk_url_running.results | map(attribute='rc', default=1)
+      | select('ne', 0) | list | length > 0

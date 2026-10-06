@@ -43,7 +43,10 @@ from it on the server side. Devices run roles locally with
   and control (set `kiosk_compositor: cage` for a watch-only fallback).
   By default it shows a status page stored on the device (survives server
   and network outages, with "Svenager server" and "Internet" reachability
-  flags fed by `<instance>/kiosk-demo/<device-id>/status`).
+  flags fed by `<instance>/kiosk-demo/<device-id>/status`). Set
+  `kiosk_second_url` to show a second page fullscreen on
+  `kiosk_second_output` (default `HDMI-A-2`), with `kiosk_url` on
+  `kiosk_output` (default `HDMI-A-1`) keeping keyboard focus.
 
 The agent injects `svenager_server_url` and `svenager_device_id` as
 extra-vars with every job, so role defaults can reference the managing
