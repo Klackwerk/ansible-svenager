@@ -18,6 +18,9 @@ Environment=LIBGL_ALWAYS_SOFTWARE=1
 # Render on the GPU node so clients, and cog's web process through them,
 # get hardware GL instead of llvmpipe.
 Environment=WLR_RENDER_DRM_DEVICE={{ kiosk_render_node }}
+# WPE WebKit rasterizes page content on the CPU by default here; on the
+# GPU it halves the CPU load of animated pages.
+Environment=WEBKIT_SKIA_ENABLE_CPU_RENDERING=0
 {% endif %}
 {% if kiosk_compositor == 'sway' %}
 ExecStart=/usr/bin/sway -c /etc/svenager-kiosk/sway.config

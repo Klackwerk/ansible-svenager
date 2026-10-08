@@ -42,4 +42,5 @@ kiosk_software_rendering: false
 # clients, Mesa hides EGL_WL_bind_wayland_display and cog's web process
 # falls back to llvmpipe, burning every CPU core. "auto" picks the v3d
 # render node when present, a path forces one, empty leaves wlroots' pick.
+# With a render node, WebKit also rasterizes page content on the GPU.
 kiosk_render_device: auto

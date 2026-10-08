@@ -81,5 +81,7 @@ argument_specs:
             render node when present; otherwise wlroots renders on the
             display controller, which has no render node on a Pi, and the
             browser's web content falls back to software GL (llvmpipe) at
-            full CPU load. Set a path such as /dev/dri/renderD128 to force
-            one, or empty to leave the choice to wlroots.
+            full CPU load. With a render node, WebKit also rasterizes page
+            content on the GPU instead of its CPU default. Set a path such
+            as /dev/dri/renderD128 to force one, or empty to leave the
+            choice to wlroots (and CPU rasterization).
