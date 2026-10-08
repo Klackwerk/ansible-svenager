@@ -14,6 +14,10 @@ Environment=XDG_RUNTIME_DIR=/run/user/%U
 Environment=WLR_RENDERER=pixman
 Environment=WLR_NO_HARDWARE_CURSORS=1
 Environment=LIBGL_ALWAYS_SOFTWARE=1
+{% elif kiosk_render_node %}
+# Render on the GPU node so clients, and cog's web process through them,
+# get hardware GL instead of llvmpipe.
+Environment=WLR_RENDER_DRM_DEVICE={{ kiosk_render_node }}
 {% endif %}
 {% if kiosk_compositor == 'sway' %}
 ExecStart=/usr/bin/sway -c /etc/svenager-kiosk/sway.config

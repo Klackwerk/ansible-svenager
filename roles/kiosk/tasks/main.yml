@@ -157,6 +157,30 @@
     mode: "0755"
   notify: Restart kiosk
 
+# The Pi's v3d GPU sits apart from its vc4 display controller; rendering
+# on vc4 leaves cog's web process on software GL, see defaults.
+- name: Find the v3d render node
+  ansible.builtin.find:
+    paths: /dev/dri/by-path
+    patterns: "*v3d-render"
+    file_type: link
+  register: kiosk_v3d_render
+  when: kiosk_render_device == 'auto'
+
+- name: Resolve the v3d render node
+  ansible.builtin.stat:
+    path: "{{ kiosk_v3d_render.files[0].path }}"
+  register: kiosk_v3d_node
+  when:
+    - kiosk_render_device == 'auto'
+    - kiosk_v3d_render.files | length > 0
+
+- name: Pick the compositor render node
+  ansible.builtin.set_fact:
+    kiosk_render_node: >-
+      {{ kiosk_v3d_node.stat.lnk_source | default('')
+         if kiosk_render_device == 'auto' else kiosk_render_device }}
+
 - name: Install kiosk unit
   ansible.builtin.template:
     src: kiosk.service.j2

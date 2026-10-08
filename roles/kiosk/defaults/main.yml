@@ -36,3 +36,10 @@ kiosk_compositor: sway
 # virtualized GPUs (virtio/virgl) glitch white frames under GL compositing.
 # Leave off on real devices (Raspberry Pi has proper GL).
 kiosk_software_rendering: false
+
+# GPU render node the compositor renders on. On a Raspberry Pi the display
+# controller (vc4) has no render node; wlroots then advertises it to
+# clients, Mesa hides EGL_WL_bind_wayland_display and cog's web process
+# falls back to llvmpipe, burning every CPU core. "auto" picks the v3d
+# render node when present, a path forces one, empty leaves wlroots' pick.
+kiosk_render_device: auto

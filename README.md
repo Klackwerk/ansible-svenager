@@ -48,6 +48,9 @@ from it on the server side. Devices run roles locally with
   `kiosk_second_output` (default `HDMI-A-2`), with `kiosk_url` on
   `kiosk_output` (default `HDMI-A-1`) keeping keyboard focus. Set
   `kiosk_resolution: 1920x1080` to keep a Raspberry Pi off 4K screens.
+  On a Pi the compositor renders on the v3d render node
+  (`kiosk_render_device: auto`); rendering on the vc4 display controller
+  leaves the browser's web content on software GL at full CPU load.
 
 The agent injects `svenager_server_url` and `svenager_device_id` as
 extra-vars with every job, so role defaults can reference the managing
