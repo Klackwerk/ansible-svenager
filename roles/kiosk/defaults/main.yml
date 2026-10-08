@@ -17,6 +17,11 @@ kiosk_second_url: ""
 kiosk_output: HDMI-A-1
 kiosk_second_output: HDMI-A-2
 
+# Display mode for every screen, e.g. 1920x1080 or 1920x1080@60Hz, to keep
+# a Raspberry Pi off 4K. Falls back to the screen's preferred mode when it
+# lacks the given one. Empty: preferred mode. Needs the sway compositor.
+kiosk_resolution: ""
+
 kiosk_user: kiosk
 kiosk_vnc_port: 5900
 

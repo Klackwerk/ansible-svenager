@@ -39,6 +39,16 @@ argument_specs:
         type: str
         default: HDMI-A-2
         description: Output showing kiosk_second_url.
+      kiosk_resolution:
+        type: str
+        default: ""
+        description:
+          - Display mode for every screen as WIDTHxHEIGHT, optionally with
+            @RATEHz (e.g. 1920x1080 or 1920x1080@60Hz). Use 1920x1080 to
+            keep a Raspberry Pi from driving a 4K screen at full
+            resolution. A screen lacking the mode falls back to its
+            preferred one. Empty uses the preferred mode. Needs the sway
+            compositor.
       kiosk_user:
         type: str
         default: kiosk

@@ -4,6 +4,9 @@
 xwayland disable
 default_border none
 output * bg #000000 solid_color
+{% if kiosk_resolution %}
+output * mode {{ kiosk_resolution }}
+{% endif %}
 seat * hide_cursor 8000
 for_window [app_id=".*"] fullscreen enable
 {% if kiosk_second_url %}
