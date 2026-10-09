@@ -5,7 +5,10 @@ case "$1" in
   2) url={{ kiosk_second_url | quote }} ;;
   *) url={{ kiosk_url | quote }} ;;
 esac
-setpriv --inh-caps -all --ambient-caps -all cog --platform=wl "$url"
+# Own app ID per screen: cog is single-instance, a second cog would hand
+# its URL to the first and quit. sway assigns windows by this app_id.
+setpriv --inh-caps -all --ambient-caps -all \
+  cog --gapplication-app-id="com.igalia.Cog.Screen$1" --platform=wl "$url"
 # cog ended (crash or exit): end the compositor so systemd restarts the
 # whole session with both screens.
 swaymsg exit

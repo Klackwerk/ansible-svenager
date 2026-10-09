@@ -13,5 +13,8 @@ for_window [app_id=".*"] fullscreen enable
 # One workspace per screen, pinned to its output.
 workspace 1 output {{ kiosk_output }}
 workspace 2 output {{ kiosk_second_output }}
+# Each browser's app_id, set by kiosk-browser.sh, picks its screen.
+assign [app_id="^com\.igalia\.Cog\.Screen1$"] workspace 1
+assign [app_id="^com\.igalia\.Cog\.Screen2$"] workspace 2
 {% endif %}
 exec /usr/local/bin/kiosk-session.sh

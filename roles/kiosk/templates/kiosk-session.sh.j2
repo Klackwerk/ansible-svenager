@@ -15,6 +15,10 @@
 # inherited/ambient caps before cog — the WebKit sandbox itself stays on.
 drop_caps="setpriv --inh-caps -all --ambient-caps -all"
 
+# D-Bus-activated portals need the display; without it portal-gtk fails
+# and WebKit's sandbox stalls page loads on portal timeouts (~50 s).
+dbus-update-activation-environment --systemd WAYLAND_DISPLAY
+
 # Supervised in a loop — at session start wayvnc can race the compositor's
 # output setup.
 (
@@ -24,10 +28,9 @@ drop_caps="setpriv --inh-caps -all --ambient-caps -all"
   done
 ) &
 {% if kiosk_compositor == 'sway' and kiosk_second_url %}
-# A window opens on the workspace focused when sway exec'd it, so start the
-# second screen first and finish on workspace 1: the main page maps last on
-# the focused workspace and gets keyboard focus. kiosk-browser.sh ends the
-# session when either browser exits.
+# sway assigns each browser to its screen by app_id; start the second
+# screen first and finish on workspace 1 so the main page gets keyboard
+# focus. kiosk-browser.sh ends the session when either browser exits.
 swaymsg "workspace 2; exec /usr/local/bin/kiosk-browser.sh 2"
 swaymsg "workspace 1; exec /usr/local/bin/kiosk-browser.sh 1"
 wait
